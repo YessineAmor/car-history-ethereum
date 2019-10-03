@@ -10,6 +10,7 @@ contract CarTracker is ERC721Full  {
     address owner = msg.sender;
     struct CarManufacturer{
         string name;
+        uint foundingDate;
         string additionalInfo;
     }
     address[] carManufacturersAddresses;
@@ -26,18 +27,18 @@ contract CarTracker is ERC721Full  {
     uint[] carIds;
     we can just use _tokenIds for iterating through cars
     */
-    mapping(uint => Car) public cars;
+    mapping(uint => Car) cars;
     modifier ownerOnly{
         require(msg.sender == owner,"Owner only!");
         _;
     }
 
     modifier manufacturerOnly{
-        require(carManufacturers[msg.sender].name!="","You need to be a registered car manufacturer to call this function");
+        require(carManufacturers[msg.sender].foundingDate!=0,"You need to be a registered car manufacturer to call this function");
         _;
     }
 
-    modifier carOwnerOnly(tokenId){
+    modifier carOwnerOnly(uint tokenId){
         require(cars[tokenId].owner == msg.sender,"Only car owner can call this function");
         _;
     }
@@ -45,12 +46,12 @@ contract CarTracker is ERC721Full  {
     constructor() ERC721Full("Car", "CAR") public {
     }
 
-    function addCarManufacturer(address _carManufcaturerAddress, string _name,string _additionalInfo) public ownerOnly {
+    function addCarManufacturer(address _carManufcaturerAddress, string memory _name,uint _foundingDate,string memory _additionalInfo) public ownerOnly {
         carManufacturersAddresses.push(_carManufcaturerAddress);
-        carManufacturers[_carManufcaturerAddress] = CarManufacturer(_name,_additionalInfo);
+        carManufacturers[_carManufcaturerAddress] = CarManufacturer(_name,_foundingDate,_additionalInfo);
     }
 
-    function createCar(address manufacturerAddress, string memory tokenURI,string _make,string _model,uint _manufacturingDate) 
+    function createCar(address manufacturerAddress, string memory tokenURI,string memory _make,string memory _model,uint _manufacturingDate) 
     public manufacturerOnly returns(uint){
         _tokenIds.increment();
         uint256 newCarId = _tokenIds.current();
